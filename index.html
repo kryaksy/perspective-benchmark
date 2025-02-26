@@ -138,10 +138,10 @@
           u("worker-create-duration", ms.format(workerCreateDuration));
 
           const tableCount = 100;
-          for (let i = 0; i < tableCount; i++) {
+          for (let j = 0; j < tableCount; j++) {
             document.getElementById("status").textContent = `Processing ${
-              i + 1
-            }/${tableCount}`;
+              i * tableCount + j + 1
+            }/${tableCount * workerCount}`;
             const now1 = performance.now();
 
             const table = await worker.table(schema);
