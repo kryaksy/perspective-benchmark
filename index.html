@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perspective Benchmark</title>
+    <title>Perspective Benchmark @latest</title>
     <script src="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/umd/perspective.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
 
@@ -45,18 +45,10 @@
         margin-bottom: 10px;
       }
 
-      .value-1,
-      .value-2 {
+      .value {
         font-size: 2rem;
         font-weight: bold;
-      }
-
-      .value-1 {
         color: #007bff;
-      }
-
-      .value-2 {
-        color: #28a745;
       }
     </style>
   </head>
@@ -65,37 +57,37 @@
     <section>
       <div class="measurement">
         <span class="key">Total</span>
-        <span id="total-duration-1" class="value-1">0</span>
+        <span id="total-duration" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">Table Create</span>
-        <span id="table-create-duration-1" class="value-1">0</span>
+        <span id="table-create-duration" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">Table Update</span>
-        <span id="table-update-duration-1" class="value-1">0</span>
+        <span id="table-update-duration" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">View Create</span>
-        <span id="view-create-duration-1" class="value-1">0</span>
+        <span id="view-create-duration" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">View ToJson</span>
-        <span id="view-tojson-duration-1" class="value-1">0</span>
+        <span id="view-tojson-duration" class="value">0</span>
       </div>
     </section>
     <section>
       <div class="measurement">
         <span class="key">jsHeapSizeLimit</span>
-        <span id="jsHeapSizeLimit-1" class="value-1">0</span>
+        <span id="jsHeapSizeLimit" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">totalJSHeapSize</span>
-        <span id="totalJSHeapSize-1" class="value-1">0</span>
+        <span id="totalJSHeapSize" class="value">0</span>
       </div>
       <div class="measurement">
         <span class="key">usedJSHeapSize</span>
-        <span id="usedJSHeapSize-1" class="value-1">0</span>
+        <span id="usedJSHeapSize" class="value">0</span>
       </div>
     </section>
     <script type="module">
@@ -159,22 +151,22 @@
 
           const diff = Math.round(performance.now() - now);
 
-          u("total-duration-1", ms.format(diff));
-          u("table-create-duration-1", ms.format(tableCreateDuration));
-          u("table-update-duration-1", ms.format(tableUpdateDuration));
-          u("view-create-duration-1", ms.format(viewCreateDuration));
-          u("view-tojson-duration-1", ms.format(viewToJsonDuration));
+          u("total-duration", ms.format(diff));
+          u("table-create-duration", ms.format(tableCreateDuration));
+          u("table-update-duration", ms.format(tableUpdateDuration));
+          u("view-create-duration", ms.format(viewCreateDuration));
+          u("view-tojson-duration", ms.format(viewToJsonDuration));
 
           u(
-            "jsHeapSizeLimit-1",
+            "jsHeapSizeLimit",
             mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
           );
           u(
-            "totalJSHeapSize-1",
+            "totalJSHeapSize",
             mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
           );
           u(
-            "usedJSHeapSize-1",
+            "usedJSHeapSize",
             mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
           );
         }
