@@ -3,9 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perspective Benchmark @latest</title>
-    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/umd/perspective.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+    <title>Perspective Benchmark</title>
 
     <style>
       body {
@@ -95,6 +93,8 @@
       </div>
     </section>
     <script type="module">
+      import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.10.1/dist/cdn/perspective.js";
+
       const ms = Intl.NumberFormat("en-US", {
         style: "unit",
         unit: "millisecond",
