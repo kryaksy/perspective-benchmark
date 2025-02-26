@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perspective Benchmark</title>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/umd/perspective.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background-color: #f0f0f0;
+        text-align: center;
+      }
+
+      section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        padding: 20px;
+        border-radius: 5px;
+      }
+
+      .measurement {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 10px;
+        width: 300px;
+        height: 200px;
+      }
+
+      .key {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .value-1,
+      .value-2 {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .value-1 {
+        color: #007bff;
+      }
+
+      .value-2 {
+        color: #28a745;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="status">Loading...</p>
+    <section>
+      <div class="measurement">
+        <span class="key">Total</span>
+        <span id="total-duration-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">Table Create</span>
+        <span id="table-create-duration-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">Table Update</span>
+        <span id="table-update-duration-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">View Create</span>
+        <span id="view-create-duration-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">View ToJson</span>
+        <span id="view-tojson-duration-1" class="value-1">0</span>
+      </div>
+    </section>
+    <section>
+      <div class="measurement">
+        <span class="key">jsHeapSizeLimit</span>
+        <span id="jsHeapSizeLimit-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">totalJSHeapSize</span>
+        <span id="totalJSHeapSize-1" class="value-1">0</span>
+      </div>
+      <div class="measurement">
+        <span class="key">usedJSHeapSize</span>
+        <span id="usedJSHeapSize-1" class="value-1">0</span>
+      </div>
+    </section>
+    <script type="module">
+      const ms = Intl.NumberFormat("en-US", {
+        style: "unit",
+        unit: "millisecond",
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      });
+      const mb = Intl.NumberFormat("en-US", {
+        style: "unit",
+        unit: "megabyte",
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      });
+
+      function u(id, value) {
+        document.getElementById(id).textContent = value;
+      }
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        const data = await (await fetch("./data.csv")).text();
+        const schema = {
+          key: "string",
+          string: "string",
+          float: "float",
+          integer: "integer",
+          datetime: "datetime",
+          boolean: "boolean",
+        };
+
+        const now = performance.now();
+        let tableCreateDuration = 0;
+        let tableUpdateDuration = 0;
+        let viewCreateDuration = 0;
+        let viewToJsonDuration = 0;
+
+        const worker = perspective.worker();
+        const measureCount = 100;
+        for (let i = 0; i < measureCount; i++) {
+          document.getElementById("status").textContent = `Processing ${
+            i + 1
+          }/${measureCount}`;
+          const now1 = performance.now();
+
+          const table = await worker.table(schema);
+          const now2 = performance.now();
+          tableCreateDuration += now2 - now1;
+
+          await table.update(data);
+          const now3 = performance.now();
+          tableUpdateDuration += now3 - now2;
+
+          const view = await table.view();
+          const now4 = performance.now();
+          viewCreateDuration += now4 - now3;
+
+          await view.to_json();
+          const now5 = performance.now();
+          viewToJsonDuration += now5 - now4;
+
+          const diff = Math.round(performance.now() - now);
+
+          u("total-duration-1", ms.format(diff));
+          u("table-create-duration-1", ms.format(tableCreateDuration));
+          u("table-update-duration-1", ms.format(tableUpdateDuration));
+          u("view-create-duration-1", ms.format(viewCreateDuration));
+          u("view-tojson-duration-1", ms.format(viewToJsonDuration));
+
+          u(
+            "jsHeapSizeLimit-1",
+            mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+          );
+          u(
+            "totalJSHeapSize-1",
+            mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
+          );
+          u(
+            "usedJSHeapSize-1",
+            mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
+          );
+        }
+
+        document.getElementById("status").textContent = `Measured!`;
+      });
+    </script>
+  </body>
+</html>
