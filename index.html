@@ -60,6 +60,10 @@
         <span id="total-duration" class="value">0</span>
       </div>
       <div class="measurement">
+        <span class="key">Worker Create</span>
+        <span id="worker-create-duration" class="value">0</span>
+      </div>
+      <div class="measurement">
         <span class="key">Table Create</span>
         <span id="table-create-duration" class="value">0</span>
       </div>
@@ -120,55 +124,63 @@
         };
 
         const now = performance.now();
+        let workerCreateDuration = 0;
         let tableCreateDuration = 0;
         let tableUpdateDuration = 0;
         let viewCreateDuration = 0;
         let viewToJsonDuration = 0;
 
-        const worker = perspective.worker();
-        const measureCount = 100;
-        for (let i = 0; i < measureCount; i++) {
-          document.getElementById("status").textContent = `Processing ${
-            i + 1
-          }/${measureCount}`;
-          const now1 = performance.now();
+        const workerCount = 3;
+        for (let i = 0; i < workerCount; i++) {
+          const now0 = performance.now();
+          const worker = await perspective.worker();
+          workerCreateDuration += performance.now() - now0;
+          u("worker-create-duration", ms.format(workerCreateDuration));
 
-          const table = await worker.table(schema);
-          const now2 = performance.now();
-          tableCreateDuration += now2 - now1;
+          const tableCount = 100;
+          for (let i = 0; i < tableCount; i++) {
+            document.getElementById("status").textContent = `Processing ${
+              i + 1
+            }/${tableCount}`;
+            const now1 = performance.now();
 
-          await table.update(data);
-          const now3 = performance.now();
-          tableUpdateDuration += now3 - now2;
+            const table = await worker.table(schema);
+            const now2 = performance.now();
+            tableCreateDuration += now2 - now1;
 
-          const view = await table.view();
-          const now4 = performance.now();
-          viewCreateDuration += now4 - now3;
+            await table.update(data);
+            const now3 = performance.now();
+            tableUpdateDuration += now3 - now2;
 
-          await view.to_json();
-          const now5 = performance.now();
-          viewToJsonDuration += now5 - now4;
+            const view = await table.view();
+            const now4 = performance.now();
+            viewCreateDuration += now4 - now3;
 
-          const diff = Math.round(performance.now() - now);
+            await view.to_json();
+            const now5 = performance.now();
+            viewToJsonDuration += now5 - now4;
 
-          u("total-duration", ms.format(diff));
-          u("table-create-duration", ms.format(tableCreateDuration));
-          u("table-update-duration", ms.format(tableUpdateDuration));
-          u("view-create-duration", ms.format(viewCreateDuration));
-          u("view-tojson-duration", ms.format(viewToJsonDuration));
+            const total = Math.round(performance.now() - now);
 
-          u(
-            "jsHeapSizeLimit",
-            mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
-          );
-          u(
-            "totalJSHeapSize",
-            mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
-          );
-          u(
-            "usedJSHeapSize",
-            mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
-          );
+            u("total-duration", ms.format(total));
+            u("table-create-duration", ms.format(tableCreateDuration));
+            u("table-update-duration", ms.format(tableUpdateDuration));
+            u("view-create-duration", ms.format(viewCreateDuration));
+            u("view-tojson-duration", ms.format(viewToJsonDuration));
+
+            u(
+              "jsHeapSizeLimit",
+              mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+            );
+            u(
+              "totalJSHeapSize",
+              mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
+            );
+            u(
+              "usedJSHeapSize",
+              mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
+            );
+          }
         }
 
         document.getElementById("status").textContent = `Measured!`;
