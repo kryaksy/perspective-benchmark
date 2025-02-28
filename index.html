@@ -112,79 +112,77 @@
         document.getElementById(id).textContent = value;
       }
 
-      document.addEventListener("DOMContentLoaded", async function () {
-        const data = await (await fetch("./data.csv")).text();
-        const schema = {
-          key: "string",
-          string: "string",
-          float: "float",
-          integer: "integer",
-          datetime: "datetime",
-          boolean: "boolean",
-        };
+      const data = await (await fetch("./data.csv")).text();
+      const schema = {
+        key: "string",
+        string: "string",
+        float: "float",
+        integer: "integer",
+        datetime: "datetime",
+        boolean: "boolean",
+      };
 
-        const now = performance.now();
-        let workerCreateDuration = 0;
-        let tableCreateDuration = 0;
-        let tableUpdateDuration = 0;
-        let viewCreateDuration = 0;
-        let viewToJsonDuration = 0;
+      const now = performance.now();
+      let workerCreateDuration = 0;
+      let tableCreateDuration = 0;
+      let tableUpdateDuration = 0;
+      let viewCreateDuration = 0;
+      let viewToJsonDuration = 0;
 
-        const workerCount = 3;
-        for (let i = 0; i < workerCount; i++) {
-          const now0 = performance.now();
-          const worker = await perspective.worker();
-          workerCreateDuration += performance.now() - now0;
-          u("worker-create-duration", ms.format(workerCreateDuration));
+      const workerCount = 3;
+      for (let i = 0; i < workerCount; i++) {
+        const now0 = performance.now();
+        const worker = await perspective.worker();
+        workerCreateDuration += performance.now() - now0;
+        u("worker-create-duration", ms.format(workerCreateDuration));
 
-          const tableCount = 100;
-          for (let j = 0; j < tableCount; j++) {
-            document.getElementById("status").textContent = `Processing ${
-              i * tableCount + j + 1
-            }/${tableCount * workerCount}`;
-            const now1 = performance.now();
+        const tableCount = 100;
+        for (let j = 0; j < tableCount; j++) {
+          document.getElementById("status").textContent = `Processing ${
+            i * tableCount + j + 1
+          }/${tableCount * workerCount}`;
+          const now1 = performance.now();
 
-            const table = await worker.table(schema);
-            const now2 = performance.now();
-            tableCreateDuration += now2 - now1;
+          const table = await worker.table(schema);
+          const now2 = performance.now();
+          tableCreateDuration += now2 - now1;
 
-            await table.update(data);
-            const now3 = performance.now();
-            tableUpdateDuration += now3 - now2;
+          await table.update(data);
+          const now3 = performance.now();
+          tableUpdateDuration += now3 - now2;
 
-            const view = await table.view();
-            const now4 = performance.now();
-            viewCreateDuration += now4 - now3;
+          const view = await table.view();
+          const now4 = performance.now();
+          viewCreateDuration += now4 - now3;
 
-            await view.to_json();
-            const now5 = performance.now();
-            viewToJsonDuration += now5 - now4;
+          await view.to_json();
+          const now5 = performance.now();
+          viewToJsonDuration += now5 - now4;
 
-            const total = Math.round(performance.now() - now);
+          const total = Math.round(performance.now() - now);
 
-            u("total-duration", ms.format(total));
-            u("table-create-duration", ms.format(tableCreateDuration));
-            u("table-update-duration", ms.format(tableUpdateDuration));
-            u("view-create-duration", ms.format(viewCreateDuration));
-            u("view-tojson-duration", ms.format(viewToJsonDuration));
+          u("total-duration", ms.format(total));
+          u("table-create-duration", ms.format(tableCreateDuration));
+          u("table-update-duration", ms.format(tableUpdateDuration));
+          u("view-create-duration", ms.format(viewCreateDuration));
+          u("view-tojson-duration", ms.format(viewToJsonDuration));
 
-            u(
-              "jsHeapSizeLimit",
-              mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
-            );
-            u(
-              "totalJSHeapSize",
-              mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
-            );
-            u(
-              "usedJSHeapSize",
-              mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
-            );
-          }
+          u(
+            "jsHeapSizeLimit",
+            mb.format(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+          );
+          u(
+            "totalJSHeapSize",
+            mb.format(performance.memory.totalJSHeapSize / 1024 / 1024)
+          );
+          u(
+            "usedJSHeapSize",
+            mb.format(performance.memory.usedJSHeapSize / 1024 / 1024)
+          );
         }
+      }
 
-        document.getElementById("status").textContent = `Measured!`;
-      });
+      document.getElementById("status").textContent = `Measured!`;
     </script>
   </body>
 </html>
